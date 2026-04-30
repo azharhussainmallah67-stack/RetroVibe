@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Order Confirmed #{{ order.id }} — {{ settings.store_name }}{% endblock %}
+{% block content %}
+<div class="container" style="max-width:680px;padding-top:3rem;">
+  <div style="text-align:center;margin-bottom:2rem;">
+    <div style="font-size:5rem;animation:pop 0.5s ease;">✅</div>
+    <h1 style="font-family:'Playfair Display',serif;font-size:2.5rem;margin-top:0.8rem;">Order Confirmed!</h1>
+    <p style="color:var(--muted);margin-top:0.5rem;">Thank you, <strong>{{ order.customer_name }}</strong>! Your order has been placed successfully.</p>
+    <div style="display:inline-block;background:#f59e0b22;border:1px solid #f59e0b44;border-radius:8px;padding:0.5rem 1.5rem;margin-top:0.8rem;">
+      <span style="color:var(--accent);font-size:1.1rem;font-weight:700;">Order ID: #{{ order.id }}</span>
+    </div>
+    <p style="color:var(--muted);font-size:0.82rem;margin-top:0.5rem;">Save this ID to track your order</p>
+  </div>
+
+  <!-- ORDER ITEMS -->
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.8rem;margin-bottom:1.2rem;">
+    <h3 style="font-family:'Playfair Display',serif;margin-bottom:1.2rem;color:var(--accent);">📦 Items Ordered</h3>
+    {% for item in order.items %}
+    <div style="display:flex;justify-content:space-between;padding:0.6rem 0;border-bottom:1px solid var(--border)22;">
+      <div><strong>{{ item.product_name }}</strong><span style="color:var(--muted);margin-left:0.5rem;">× {{ item.quantity }}</span></div>
+      <div style="color:var(--accent);font-weight:600;">{{ settings.currency }} {{ "{:,.0f}".format(item.subtotal) }}</div>
+    </div>
+    {% endfor %}
+    <div style="display:flex;justify-content:space-between;padding-top:0.8rem;margin-top:0.4rem;font-size:0.875rem;color:var(--muted);">
+      <span>Shipping</span><span>{% if order.shipping == 0 %}FREE{% else %}{{ settings.currency }} {{ order.shipping }}{% endif %}</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;padding-top:0.8rem;border-top:1px solid var(--border);margin-top:0.4rem;font-size:1.1rem;font-weight:700;">
+      <span>Total Paid</span><span style="color:var(--accent);">{{ settings.currency }} {{ "{:,.0f}".format(order.grand_total) }}</span>
+    </div>
+  </div>
+
+  <!-- DELIVERY DETAILS -->
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.8rem;margin-bottom:1.2rem;">
+    <h3 style="font-family:'Playfair Display',serif;margin-bottom:1.2rem;">🚚 Delivery Details</h3>
+    <table style="width:100%;border-collapse:collapse;">
+      <tr style="border-bottom:1px solid var(--border)22;">
+        <td style="padding:0.5rem 0;color:var(--muted);width:140px;">Name</td>
+        <td style="padding:0.5rem 0;font-weight:500;">{{ order.customer_name }}</td>
+      </tr>
+      <tr style="border-bottom:1px solid var(--border)22;">
+        <td style="padding:0.5rem 0;color:var(--muted);">Phone</td>
+        <td style="padding:0.5rem 0;">{{ order.customer_phone }}</td>
+      </tr>
+      <tr style="border-bottom:1px solid var(--border)22;">
+        <td style="padding:0.5rem 0;color:var(--muted);">Address</td>
+        <td style="padding:0.5rem 0;">{{ order.customer_address }}</td>
+      </tr>
+      <tr>
+        <td style="padding:0.5rem 0;color:var(--muted);">City</td>
+        <td style="padding:0.5rem 0;">{{ order.customer_city }}</td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- WHAT'S NEXT -->
+  <div style="background:#065f4622;border:1px solid #10b98133;border-radius:12px;padding:1.5rem;margin-bottom:2rem;">
+    <h4 style="color:var(--success);margin-bottom:0.8rem;">📋 What Happens Next?</h4>
+    <div style="font-size:0.875rem;color:var(--muted);line-height:2;">
+      1. 📞 We'll call <strong style="color:var(--text);">{{ order.customer_phone }}</strong> within 24 hours to confirm<br>
+      2. 📦 Your order will be packed and dispatched<br>
+      3. 🚚 Delivery in 2–4 business days<br>
+      4. 💳 Pay Cash on Delivery when you receive it
+    </div>
+  </div>
+
+  <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+    <a href="/track?order_id={{ order.id }}" class="btn btn-secondary" style="flex:1;justify-content:center;">📍 Track Order</a>
+    <a href="/" class="btn btn-primary" style="flex:1;justify-content:center;">← Continue Shopping</a>
+  </div>
+</div>
+<style>@keyframes pop{0%{transform:scale(0.5);opacity:0}80%{transform:scale(1.2)}100%{transform:scale(1);opacity:1}}</style>
+{% endblock %}

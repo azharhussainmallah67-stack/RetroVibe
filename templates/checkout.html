@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Checkout — {{ settings.store_name }}{% endblock %}
+{% block extra_css %}
+<style>
+.checkout-grid{display:grid;grid-template-columns:1fr 380px;gap:2rem;align-items:start;}
+.checkout-form-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:2rem;}
+.checkout-form-box h2{font-family:'Playfair Display',serif;margin-bottom:1.5rem;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.order-review{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.5rem;position:sticky;top:90px;}
+.order-review h3{font-family:'Playfair Display',serif;margin-bottom:1.2rem;}
+.or-item{display:flex;gap:0.8rem;align-items:center;margin-bottom:0.8rem;padding-bottom:0.8rem;border-bottom:1px solid var(--border);}
+.or-item:last-of-type{border-bottom:none;}
+.or-img{width:52px;height:42px;border-radius:6px;object-fit:cover;border:1px solid var(--border);}
+.or-name{font-size:0.875rem;font-weight:600;flex:1;}
+.or-qty{font-size:0.78rem;color:var(--muted);}
+.or-price{font-weight:700;color:var(--accent);font-size:0.9rem;}
+.sum-row{display:flex;justify-content:space-between;font-size:0.875rem;margin-bottom:0.6rem;}
+.sum-row .lbl{color:var(--muted);}
+.sum-total{display:flex;justify-content:space-between;font-size:1.1rem;font-weight:700;padding-top:0.8rem;border-top:1px solid var(--border);margin-top:0.6rem;}
+.step-header{display:flex;align-items:center;gap:0.8rem;margin-bottom:1.5rem;}
+.step-num{background:var(--accent);color:#000;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.85rem;flex-shrink:0;}
+.step-header h2{font-family:'Playfair Display',serif;font-size:1.3rem;}
+@media(max-width:800px){.checkout-grid{grid-template-columns:1fr;}.row2{grid-template-columns:1fr;}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top:2rem;">
+  <div class="breadcrumb" style="color:var(--muted);font-size:0.85rem;margin-bottom:1.5rem;">
+    <a href="/" style="color:var(--muted);">Home</a> › <a href="/cart" style="color:var(--muted);">Cart</a> › <span style="color:var(--text);">Checkout</span>
+  </div>
+
+  <div class="checkout-grid">
+    <!-- FORM -->
+    <div class="checkout-form-box">
+      <div class="step-header"><div class="step-num">1</div><h2>Delivery Information</h2></div>
+      <form method="post" action="/checkout">
+        <div class="row2">
+          <div class="form-group">
+            <label>Full Name *</label>
+            <input type="text" name="customer_name" placeholder="Your full name" required>
+          </div>
+          <div class="form-group">
+            <label>Phone Number *</label>
+            <input type="tel" name="customer_phone" placeholder="03XX-XXXXXXX" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Email Address (optional)</label>
+          <input type="email" name="customer_email" placeholder="you@example.com">
+        </div>
+        <div class="form-group">
+          <label>Delivery Address *</label>
+          <textarea name="customer_address" placeholder="House/Flat number, Street name, Area..." required style="min-height:80px;"></textarea>
+        </div>
+        <div class="form-group">
+          <label>City *</label>
+          <input type="text" name="customer_city" placeholder="e.g. Karachi, Lahore, Islamabad" required>
+        </div>
+        <div class="form-group">
+          <label>Order Notes (optional)</label>
+          <textarea name="customer_notes" placeholder="Any special instructions for delivery..." style="min-height:70px;"></textarea>
+        </div>
+
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem;margin-bottom:1.5rem;">
+          <div style="font-size:0.85rem;font-weight:600;margin-bottom:0.5rem;">💳 Payment Method</div>
+          <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.875rem;cursor:pointer;color:var(--text);">
+            <input type="radio" name="payment" value="cod" checked style="accent-color:var(--accent);">
+            Cash on Delivery (COD) — Pay when you receive
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg">
+          🎉 Place Order — {{ settings.currency }} {{ "{:,.0f}".format(grand_total) }}
+        </button>
+      </form>
+    </div>
+
+    <!-- ORDER REVIEW -->
+    <div class="order-review">
+      <h3>Order Review ({{ cart_items|length }} item(s))</h3>
+      {% for item in cart_items %}
+      <div class="or-item">
+        <img src="{{ item.images[0] if item.images else '' }}" class="or-img" alt="{{ item.name }}">
+        <div class="or-name">{{ item.name }}<br><span class="or-qty">Qty: {{ item.qty }}</span></div>
+        <div class="or-price">{{ settings.currency }} {{ "{:,.0f}".format(item.subtotal) }}</div>
+      </div>
+      {% endfor %}
+      <div class="sum-row"><span class="lbl">Subtotal</span><span>{{ settings.currency }} {{ "{:,.0f}".format(total) }}</span></div>
+      <div class="sum-row"><span class="lbl">Shipping</span><span>{% if shipping == 0 %}<span style="color:var(--success);">FREE</span>{% else %}{{ settings.currency }} {{ shipping }}{% endif %}</span></div>
+      <div class="sum-total"><span>Grand Total</span><span style="color:var(--accent);">{{ settings.currency }} {{ "{:,.0f}".format(grand_total) }}</span></div>
+
+      <div style="margin-top:1.5rem;padding:1rem;background:var(--surface);border-radius:8px;font-size:0.82rem;color:var(--muted);line-height:1.6;">
+        🔒 Your information is safe and secure.<br>
+        📞 We'll call to confirm your order.<br>
+        🚚 Expected delivery: 2–4 business days.
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Admin — {{ settings.store_name }}</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--surface:#12121a;--card:#1a1a26;--border:#2a2a3e;--accent:#f59e0b;--accent2:#38bdf8;--text:#e2e8f0;--muted:#64748b;--success:#10b981;--danger:#ef4444;--warning:#f59e0b;--purple:#a855f7;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;display:flex;min-height:100vh;}
+.sidebar{width:248px;background:var(--surface);border-right:1px solid var(--border);padding:1.5rem;flex-shrink:0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
+.sb-brand{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--accent);}
+.sb-sub{font-size:0.7rem;color:var(--muted);margin-bottom:2rem;}
+.nav-sec{font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.12em;padding:0.8rem 0.6rem 0.3rem;}
+.nv{display:block;padding:0.55rem 0.8rem;border-radius:7px;color:var(--muted);font-size:0.875rem;transition:all 0.2s;cursor:pointer;border:none;background:none;width:100%;text-align:left;font-family:'DM Sans',sans-serif;}
+.nv:hover{background:var(--card);color:var(--text);}
+.nv.active{background:var(--card);color:var(--text);}
+.nv.red{color:var(--danger);}
+.nv.red:hover{background:#7f1d1d22;}
+.bc{background:#f59e0b22;color:var(--accent);border-radius:10px;padding:1px 6px;font-size:0.7rem;margin-left:0.4rem;}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+.topbar h2{font-family:'Playfair Display',serif;font-size:1.2rem;}
+.content{padding:2rem;flex:1;overflow-y:auto;}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem;}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.4rem;position:relative;overflow:hidden;}
+.sc::after{content:attr(data-icon);position:absolute;right:1rem;top:1rem;font-size:2rem;opacity:0.5;}
+.sc .slabel{font-size:0.75rem;color:var(--muted);font-weight:500;}
+.sc .sval{font-size:1.8rem;font-weight:700;margin-top:0.2rem;line-height:1;}
+.sc .schange{font-size:0.75rem;color:var(--success);margin-top:0.3rem;}
+
+/* TABS */
+.tc{display:none;}
+.tc.active{display:block;}
+
+/* TABLE */
+.sec{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:1.5rem;overflow:hidden;}
+.sec-head{padding:1.1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.sec-head h3{font-family:'Playfair Display',serif;font-size:1.1rem;}
+table{width:100%;border-collapse:collapse;}
+th{padding:0.7rem 1.2rem;text-align:left;font-size:0.7rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.07em;border-bottom:1px solid var(--border);}
+td{padding:0.75rem 1.2rem;font-size:0.875rem;border-bottom:1px solid #ffffff06;vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:#ffffff03;}
+
+.btn{display:inline-flex;align-items:center;gap:0.3rem;padding:0.38rem 0.85rem;border-radius:6px;font-size:0.8rem;font-weight:600;cursor:pointer;text-decoration:none;border:none;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+.btn-p{background:var(--accent);color:#000;}
+.btn-e{background:#1e3a5f;color:var(--accent2);border:1px solid #38bdf833;}
+.btn-d{background:#7f1d1d22;color:var(--danger);border:1px solid #ef444433;}
+.thumb{width:46px;height:36px;border-radius:5px;object-fit:cover;}
+
+.badge{display:inline-block;padding:0.2rem 0.6rem;border-radius:20px;font-size:0.72rem;font-weight:600;}
+.badge-pending{background:#92400e22;color:#f59e0b;border:1px solid #f59e0b44;}
+.badge-confirmed{background:#1e3a5f22;color:var(--accent2);border:1px solid #38bdf844;}
+.badge-shipped{background:#4c1d9522;color:var(--purple);border:1px solid #a855f744;}
+.badge-delivered{background:#065f4622;color:var(--success);border:1px solid #10b98144;}
+.badge-cancelled{background:#7f1d1d22;color:var(--danger);border:1px solid #ef444444;}
+
+.sel{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:0.3rem 0.6rem;border-radius:6px;font-size:0.78rem;font-family:'DM Sans',sans-serif;outline:none;}
+.frow{margin-bottom:1.1rem;}
+.frow label{display:block;font-size:0.8rem;color:var(--muted);margin-bottom:0.35rem;font-weight:500;}
+.frow input,.frow textarea,.frow select{width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:0.65rem 0.9rem;border-radius:8px;font-size:0.875rem;font-family:'DM Sans',sans-serif;outline:none;transition:border-color 0.2s;}
+.frow input:focus,.frow textarea:focus{border-color:var(--accent);}
+.frow textarea{min-height:80px;resize:vertical;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.sf{max-width:520px;padding:1.5rem;}
+.low-stock{color:var(--danger);}
+.warn-stock{color:var(--warning);}
+.ok-stock{color:var(--success);}
+.empty-td{text-align:center;color:var(--muted);padding:2rem!important;}
+.review-card-mini{background:var(--surface);border-radius:8px;padding:0.8rem;margin-bottom:0.6rem;font-size:0.82rem;}
+.review-card-mini .stars{color:var(--accent);}
+
+/* ALERT BOXES */
+.alert{border-radius:8px;padding:0.8rem 1.2rem;margin-bottom:1rem;font-size:0.85rem;}
+.alert-warn{background:#92400e22;border:1px solid #f59e0b44;color:var(--warning);}
+</style>
+</head>
+<body>
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-brand">{{ settings.store_name }}</div>
+  <div class="sb-sub">Admin Dashboard</div>
+  <div class="nav-sec">Manage</div>
+  <button class="nv active" onclick="showTab('overview')" id="l-overview">📊 Overview</button>
+  <button class="nv" onclick="showTab('products')" id="l-products">📦 Products</button>
+  <button class="nv" onclick="showTab('orders')" id="l-orders">🛒 Orders{% if pending_orders > 0 %}<span class="bc">{{ pending_orders }}</span>{% endif %}</button>
+  <button class="nv" onclick="showTab('reviews')" id="l-reviews">⭐ Reviews</button>
+  <button class="nv" onclick="showTab('settings')" id="l-settings">⚙️ Settings</button>
+  <div class="nav-sec">Store</div>
+  <a href="/" target="_blank" class="nv">🌐 View Store</a>
+  <a href="/admin/logout" class="nv red">🚪 Logout</a>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <h2 id="ptitle">Overview</h2>
+    <span style="color:var(--muted);font-size:0.85rem;">Welcome back, Admin 👋</span>
+  </div>
+  <div class="content">
+
+    <!-- OVERVIEW TAB -->
+    <div class="tc active" id="tab-overview">
+      <div class="stats">
+        <div class="sc" data-icon="📦"><div class="slabel">Total Products</div><div class="sval" style="color:var(--accent2);">{{ total_products }}</div></div>
+        <div class="sc" data-icon="🛒"><div class="slabel">Total Orders</div><div class="sval" style="color:var(--accent);">{{ total_orders }}</div></div>
+        <div class="sc" data-icon="⏳"><div class="slabel">Pending Orders</div><div class="sval" style="color:var(--warning);">{{ pending_orders }}</div></div>
+        <div class="sc" data-icon="💰"><div class="slabel">Total Revenue</div><div class="sval" style="color:var(--success);">{{ settings.currency }} {{ "{:,.0f}".format(total_revenue) }}</div></div>
+      </div>
+
+      {% if low_stock %}
+      <div class="alert alert-warn">⚠️ <strong>Low Stock Alert:</strong> {{ low_stock|map(attribute='name')|join(', ') }} — Less than 10 units remaining.</div>
+      {% endif %}
+
+      <!-- RECENT ORDERS -->
+      <div class="sec">
+        <div class="sec-head"><h3>🕐 Recent Orders</h3><button class="btn btn-e" onclick="showTab('orders')">View All</button></div>
+        <table>
+          <thead><tr><th>Order ID</th><th>Customer</th><th>Phone</th><th>Address</th><th>Total</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody>
+            {% if recent_orders %}
+            {% for o in recent_orders %}
+            <tr>
+              <td><strong style="color:var(--accent);">#{{ o.id }}</strong><br><small style="color:var(--muted);">{{ o.created_at[:10] }}</small></td>
+              <td>{{ o.customer_name }}</td>
+              <td>{{ o.customer_phone }}</td>
+              <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="{{ o.customer_address }}, {{ o.customer_city }}">{{ o.customer_address[:30] }}…</td>
+              <td style="color:var(--accent);font-weight:600;">{{ settings.currency }} {{ "{:,.0f}".format(o.grand_total) }}</td>
+              <td><span class="badge badge-{{ o.status }}">{{ o.status|capitalize }}</span></td>
+              <td><a href="/admin/orders/{{ o.id }}" class="btn btn-e">View</a></td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr><td colspan="7" class="empty-td">No orders yet.</td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PRODUCTS TAB -->
+    <div class="tc" id="tab-products">
+      <div class="sec">
+        <div class="sec-head"><h3>📦 All Products ({{ total_products }})</h3><a href="/admin/products/add" class="btn btn-p">+ Add Product</a></div>
+        <table>
+          <thead><tr><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Original</th><th>Stock</th><th>Featured</th><th>Actions</th></tr></thead>
+          <tbody>
+            {% if products %}{% for p in products %}
+            <tr>
+              <td><img src="{{ p.images[0] if p.images else '' }}" class="thumb" alt="{{ p.name }}"></td>
+              <td><strong>{{ p.name }}</strong></td>
+              <td style="color:var(--accent2);">{{ p.category }}</td>
+              <td style="color:var(--accent);font-weight:600;">{{ settings.currency }} {{ "{:,.0f}".format(p.price) }}</td>
+              <td style="color:var(--muted);text-decoration:line-through;">{{ "{:,.0f}".format(p.original_price) if p.original_price else '—' }}</td>
+              <td class="{% if p.stock < 5 %}low-stock{% elif p.stock < 15 %}warn-stock{% else %}ok-stock{% endif %}">{{ p.stock }}</td>
+              <td>{% if p.featured %}<span style="color:var(--accent);">⭐ Yes</span>{% else %}<span style="color:var(--muted);">No</span>{% endif %}</td>
+              <td style="display:flex;gap:0.4rem;flex-wrap:wrap;">
+                <a href="/admin/products/edit/{{ p.id }}" class="btn btn-e">✏ Edit</a>
+                <form method="post" action="/admin/products/delete/{{ p.id }}" style="display:inline" onsubmit="return confirm('Delete this product permanently?')">
+                  <button type="submit" class="btn btn-d">🗑</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}{% else %}
+            <tr><td colspan="8" class="empty-td">No products. Click "+ Add Product" to start.</td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ORDERS TAB -->
+    <div class="tc" id="tab-orders">
+      <div class="sec">
+        <div class="sec-head"><h3>🛒 All Orders ({{ total_orders }})</h3></div>
+        <table>
+          <thead><tr><th>Order ID</th><th>Date</th><th>Customer</th><th>Phone</th><th>Full Address</th><th>City</th><th>Items</th><th>Total</th><th>Status</th><th>Update</th><th>Detail</th></tr></thead>
+          <tbody>
+            {% if orders %}{% for o in orders|reverse %}
+            <tr>
+              <td><strong style="color:var(--accent);">#{{ o.id }}</strong></td>
+              <td style="color:var(--muted);font-size:0.8rem;">{{ o.created_at[:10] }}</td>
+              <td>{{ o.customer_name }}</td>
+              <td>{{ o.customer_phone }}</td>
+              <td style="max-width:180px;">{{ o.customer_address }}</td>
+              <td>{{ o.customer_city }}</td>
+              <td style="color:var(--muted);">{{ o.items|length }} item(s)</td>
+              <td style="color:var(--accent);font-weight:700;">{{ settings.currency }} {{ "{:,.0f}".format(o.grand_total) }}</td>
+              <td><span class="badge badge-{{ o.status }}">{{ o.status|capitalize }}</span></td>
+              <td>
+                <form method="post" action="/admin/orders/update/{{ o.id }}" style="display:flex;gap:0.3rem;">
+                  <select name="status" class="sel">
+                    <option value="pending" {% if o.status=='pending' %}selected{% endif %}>Pending</option>
+                    <option value="confirmed" {% if o.status=='confirmed' %}selected{% endif %}>Confirmed</option>
+                    <option value="shipped" {% if o.status=='shipped' %}selected{% endif %}>Shipped</option>
+                    <option value="delivered" {% if o.status=='delivered' %}selected{% endif %}>Delivered</option>
+                    <option value="cancelled" {% if o.status=='cancelled' %}selected{% endif %}>Cancelled</option>
+                  </select>
+                  <button type="submit" class="btn btn-p" style="padding:0.3rem 0.6rem;">✓</button>
+                </form>
+              </td>
+              <td><a href="/admin/orders/{{ o.id }}" class="btn btn-e">View</a></td>
+            </tr>
+            {% endfor %}{% else %}
+            <tr><td colspan="11" class="empty-td">No orders yet.</td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- REVIEWS TAB -->
+    <div class="tc" id="tab-reviews">
+      <div class="sec">
+        <div class="sec-head"><h3>⭐ Customer Reviews ({{ reviews|length }})</h3></div>
+        <table>
+          <thead><tr><th>Product</th><th>Reviewer</th><th>Rating</th><th>Comment</th><th>Date</th></tr></thead>
+          <tbody>
+            {% if reviews %}{% for r in reviews|reverse %}
+            <tr>
+              <td style="color:var(--accent2);">{{ r.product_id }}</td>
+              <td><strong>{{ r.reviewer_name }}</strong></td>
+              <td><span style="color:var(--accent);">{{ '★' * r.rating }}{{ '☆' * (5-r.rating) }}</span> {{ r.rating }}/5</td>
+              <td style="max-width:300px;color:var(--muted);">{{ r.comment }}</td>
+              <td style="font-size:0.8rem;color:var(--muted);">{{ r.created_at }}</td>
+            </tr>
+            {% endfor %}{% else %}
+            <tr><td colspan="5" class="empty-td">No reviews yet.</td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SETTINGS TAB -->
+    <div class="tc" id="tab-settings">
+      <div class="sec">
+        <div class="sec-head"><h3>⚙️ Store Settings</h3></div>
+        <div class="sf">
+          <form method="post" action="/admin/settings/update">
+            <div class="row2">
+              <div class="frow"><label>Store Name</label><input type="text" name="store_name" value="{{ settings.store_name }}" required></div>
+              <div class="frow"><label>Currency (e.g. PKR)</label><input type="text" name="currency" value="{{ settings.currency }}" required></div>
+            </div>
+            <div class="frow"><label>Store Tagline</label><input type="text" name="store_tagline" value="{{ settings.store_tagline }}"></div>
+            <div class="frow"><label>Announcement Bar Text</label><input type="text" name="announcement" value="{{ settings.announcement }}"></div>
+            <div class="row2">
+              <div class="frow"><label>WhatsApp Number</label><input type="text" name="whatsapp" value="{{ settings.whatsapp }}"></div>
+              <div class="frow"><label>Email Address</label><input type="text" name="email" value="{{ settings.email }}"></div>
+            </div>
+            <div class="row2">
+              <div class="frow"><label>Store Address</label><input type="text" name="address" value="{{ settings.address }}"></div>
+              <div class="frow"><label>Free Shipping Above ({{ settings.currency }})</label><input type="number" name="free_shipping_above" value="{{ settings.free_shipping_above }}"></div>
+            </div>
+            <div class="frow"><label>Admin Password</label><input type="password" name="admin_password" value="{{ settings.admin_password }}" required></div>
+            <button type="submit" class="btn btn-p" style="padding:0.7rem 2rem;font-size:0.9rem;">💾 Save Settings</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<script>
+const labels={overview:'Overview',products:'Products',orders:'Orders',reviews:'Reviews',settings:'Settings'};
+function showTab(n){
+  document.querySelectorAll('.tc').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nv').forEach(a=>a.classList.remove('active'));
+  document.getElementById('tab-'+n).classList.add('active');
+  document.getElementById('l-'+n).classList.add('active');
+  document.getElementById('ptitle').textContent=labels[n];
+}
+</script>
+</body>
+</html>

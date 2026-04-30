@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }} — {{ settings.store_name }}{% endblock %}
+{% block extra_css %}
+<style>
+.breadcrumb{color:var(--muted);font-size:0.85rem;margin-bottom:1.5rem;}
+.breadcrumb a{color:var(--muted);}
+.breadcrumb a:hover{color:var(--accent);}
+.breadcrumb span{margin:0 0.4rem;}
+
+.pd-grid{display:grid;grid-template-columns:1fr 1fr;gap:3.5rem;align-items:start;}
+.gallery{position:sticky;top:88px;}
+.main-img{border-radius:14px;overflow:hidden;border:1px solid var(--border);aspect-ratio:4/3;background:var(--card);}
+.main-img img{width:100%;height:100%;object-fit:cover;transition:opacity 0.3s;}
+.thumb-row{display:flex;gap:0.6rem;margin-top:0.8rem;}
+.thumb{width:72px;height:54px;border-radius:8px;overflow:hidden;border:2px solid var(--border);cursor:pointer;transition:border-color 0.2s;flex-shrink:0;}
+.thumb:hover,.thumb.active{border-color:var(--accent);}
+.thumb img{width:100%;height:100%;object-fit:cover;}
+
+.pd-info{ min-height: 1px; } /* Empty ruleset fixed */
+.pd-cat{font-size:0.75rem;color:var(--accent2);font-weight:700;text-transform:uppercase;letter-spacing:0.15em;}
+.pd-title{font-family:'Playfair Display',serif;font-size:2rem;margin:0.5rem 0;line-height:1.2;}
+.pd-rating-row{display:flex;align-items:center;gap:0.8rem;margin-bottom:1rem;}
+.pd-rating-row .stars{font-size:1.1rem;}
+.pd-rating-row a{color:var(--muted);font-size:0.85rem;}
+.pd-price-row{display:flex;align-items:baseline;gap:0.8rem;margin-bottom:0.5rem;}
+.pd-price{font-size:2.2rem;font-weight:700;color:var(--accent);}
+.pd-original{font-size:1.1rem;color:var(--muted);text-decoration:line-through;}
+.pd-saving{background:#065f4622;color:var(--success);border:1px solid #10b98133;border-radius:6px;padding:0.2rem 0.6rem;font-size:0.8rem;font-weight:600;}
+.pd-stock{margin-bottom:1.5rem;}
+.pd-desc{color:var(--muted);line-height:1.8;margin-bottom:1.5rem;font-size:0.95rem;}
+.pd-tags{display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1.5rem;}
+.pd-tag{background:var(--surface);border:1px solid var(--border);color:var(--muted);border-radius:20px;padding:0.2rem 0.7rem;font-size:0.78rem;}
+
+.qty-row{display:flex;align-items:center;gap:1rem;margin-bottom:1.2rem;}
+.qty-wrap{display:flex;align-items:center;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+.qty-btn{background:var(--card);border:none;color:var(--text);width:38px;height:42px;font-size:1.1rem;cursor:pointer;transition:background 0.2s;}
+.qty-btn:hover{background:var(--border);}
+.qty-input{background:var(--surface);border:none;border-left:1px solid var(--border);border-right:1px solid var(--border);color:var(--text);width:52px;height:42px;text-align:center;font-size:0.95rem;font-family:'DM Sans',sans-serif;}
+.qty-input:focus{outline:none;}
+
+.action-row{display:flex;gap:0.8rem;flex-wrap:wrap;}
+.action-row .btn{flex:1;justify-content:center;}
+
+.guarantee-row{display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-top:1.5rem;}
+.guarantee-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0.8rem;display:flex;align-items:center;gap:0.6rem;font-size:0.82rem;color:var(--muted);}
+.guarantee-item .g-icon{font-size:1.2rem;}
+
+/* REVIEWS */
+.reviews-section{margin-top:4rem;}
+.review-summary{display:grid;grid-template-columns:auto 1fr;gap:2rem;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:2rem;margin-bottom:2rem;align-items:center;}
+.big-rating{text-align:center;}
+.big-rating .num{font-size:4rem;font-weight:700;color:var(--accent);line-height:1;}
+.big-rating .stars{font-size:1.5rem;}
+.big-rating p{color:var(--muted);font-size:0.82rem;margin-top:0.3rem;}
+.rating-bars{ width: 100%; } /* Empty ruleset fixed */
+.rating-bar-row{display:flex;align-items:center;gap:0.8rem;margin-bottom:0.5rem;font-size:0.82rem;}
+.rating-bar-row span{color:var(--muted);width:30px;text-align:right;}
+.bar-bg{flex:1;background:var(--surface);border-radius:4px;height:8px;overflow:hidden;}
+.bar-fill{height:100%;background:var(--accent);border-radius:4px;}
+
+.review-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1rem;}
+.review-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.8rem;}
+.reviewer-name{font-weight:600;}
+.review-date{font-size:0.78rem;color:var(--muted);}
+.review-text{color:var(--muted);font-size:0.9rem;line-height:1.6;}
+
+.write-review{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:2rem;margin-top:2rem;}
+.write-review h3{font-family:'Playfair Display',serif;margin-bottom:1.5rem;}
+.star-picker{display:flex;gap:0.3rem;margin-bottom:1rem;}
+.star-pick{font-size:1.8rem;cursor:pointer;color:var(--border);transition:color 0.15s;}
+.star-pick.active,.star-pick:hover{color:var(--accent);}
+
+/* RELATED */
+.related-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;}
+
+@media(max-width:900px){.pd-grid{grid-template-columns:1fr;}.related-grid{grid-template-columns:1fr 1fr;}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="breadcrumb">
+    <a href="/">Home</a><span>›</span>
+    <a href="/?category={{ product.category }}">{{ product.category }}</a><span>›</span>
+    <span style="color:var(--text);">{{ product.name }}</span>
+  </div>
+
+  <div class="pd-grid">
+    <div class="gallery">
+      <div class="main-img">
+        <img src="{{ product.images[0] if product.images else '' }}" alt="{{ product.name }}" id="mainImg">
+      </div>
+      {% if product.images|length > 1 %}
+      <div class="thumb-row">
+        {% for img in product.images %}
+        <div class="thumb {% if loop.first %}active{% endif %}" onclick="switchImg('{{ img }}', this)">
+          <img src="{{ img }}" alt="{{ product.name }} {{ loop.index }}">
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="pd-info">
+      <div class="pd-cat">{{ product.category }}</div>
+      <h1 class="pd-title">{{ product.name }}</h1>
+
+      <div class="pd-rating-row">
+        <span class="stars">{% for i in range(1,6) %}<span class="star {% if i <= avg_rating %}filled{% endif %}">★</span>{% endfor %}</span>
+        <span style="font-weight:600;">{{ avg_rating }}</span>
+        <a href="#reviews">({{ reviews|length }} reviews)</a>
+      </div>
+
+      <div class="pd-price-row">
+        <span class="pd-price">{{ settings.currency }} {{ "{:,.0f}".format(product.price) }}</span>
+        {% if product.original_price > product.price %}
+        <span class="pd-original">{{ "{:,.0f}".format(product.original_price) }}</span>
+        <span class="pd-saving">Save {{ settings.currency }} {{ "{:,.0f}".format(product.original_price - product.price) }}</span>
+        {% endif %}
+      </div>
+
+      <div class="pd-stock">
+        {% if product.stock > 10 %}<span style="color:var(--success);">✓ In Stock ({{ product.stock }} units)</span>
+        {% elif product.stock > 0 %}<span style="color:var(--warning);">⚠️ Only {{ product.stock }} left!</span>
+        {% else %}<span style="color:var(--danger);">✗ Out of Stock</span>{% endif %}
+      </div>
+
+      <p class="pd-desc">{{ product.description }}</p>
+
+      {% if product.stock > 0 %}
+      <form method="post" action="/cart/add">
+        <input type="hidden" name="product_id" value="{{ product.id }}">
+        <div class="qty-row">
+          <label style="font-size:0.85rem;color:var(--muted);font-weight:600;">Quantity:</label>
+          <div class="qty-wrap">
+            <button type="button" class="qty-btn" onclick="changeQty(-1)">−</button>
+            <input type="number" name="quantity" id="qtyInput" class="qty-input" value="1" readonly>
+            <button type="button" class="qty-btn" onclick="changeQty(1)">+</button>
+          </div>
+          <span id="subtotalDisplay" style="color:var(--accent);font-weight:700;font-size:1.1rem;">{{ settings.currency }} {{ "{:,.0f}".format(product.price) }}</span>
+        </div>
+        <div class="action-row">
+          <button type="submit" class="btn btn-secondary">🛒 Add to Cart</button>
+          <a href="/checkout" class="btn btn-primary">⚡ Buy Now</a>
+        </div>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function switchImg(src, el){
+  document.getElementById('mainImg').src = src;
+  document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+/* YAHAN FIX HAI: Quotes lagaye gaye hain */
+const price = parseFloat("{{ product.price }}");
+const currency = "{{ settings.currency }}";
+const maxStock = parseInt("{{ product.stock }}");
+
+function changeQty(d){
+  const inp = document.getElementById('qtyInput');
+  let val = parseInt(inp.value || 1) + d;
+  if(val < 1) val = 1;
+  if(val > maxStock) val = maxStock;
+  inp.value = val;
+  document.getElementById('subtotalDisplay').textContent = currency + ' ' + (price * val).toLocaleString();
+}
+</script>
+{% endblock %}

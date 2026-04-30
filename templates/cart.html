@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}My Cart — {{ settings.store_name }}{% endblock %}
+{% block extra_css %}
+<style>
+.cart-grid{display:grid;grid-template-columns:1fr 360px;gap:2rem;align-items:start;}
+.cart-items{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.cart-header{padding:1.2rem 1.5rem;border-bottom:1px solid var(--border);font-family:'Playfair Display',serif;font-size:1.2rem;}
+.cart-row{display:flex;gap:1.2rem;padding:1.2rem 1.5rem;border-bottom:1px solid var(--border);align-items:center;}
+.cart-row:last-child{border-bottom:none;}
+.cart-img{width:80px;height:64px;border-radius:8px;object-fit:cover;flex-shrink:0;border:1px solid var(--border);}
+.cart-info{flex:1;}
+.cart-name{font-weight:600;margin-bottom:0.2rem;}
+.cart-cat{font-size:0.78rem;color:var(--muted);}
+.cart-price{color:var(--accent);font-weight:700;}
+.cart-qty{display:flex;align-items:center;border:1px solid var(--border);border-radius:7px;overflow:hidden;}
+.cq-btn{background:var(--surface);border:none;color:var(--text);width:32px;height:34px;cursor:pointer;font-size:1rem;}
+.cq-input{background:var(--card);border:none;border-left:1px solid var(--border);border-right:1px solid var(--border);color:var(--text);width:44px;height:34px;text-align:center;font-size:0.875rem;}
+.cart-sub{font-weight:700;color:var(--text);font-size:1rem;min-width:90px;text-align:right;}
+.remove-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:1.1rem;padding:0.3rem;transition:color 0.2s;}
+.remove-btn:hover{color:var(--danger);}
+
+.cart-summary{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1.5rem;position:sticky;top:90px;}
+.cart-summary h3{font-family:'Playfair Display',serif;margin-bottom:1.5rem;}
+.summary-row{display:flex;justify-content:space-between;margin-bottom:0.8rem;font-size:0.9rem;}
+.summary-row.total{font-size:1.1rem;font-weight:700;padding-top:0.8rem;border-top:1px solid var(--border);margin-top:0.8rem;}
+.summary-row .label{color:var(--muted);}
+.promo-row{display:flex;gap:0.5rem;margin:1rem 0;}
+.promo-row input{flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text);padding:0.55rem 0.8rem;border-radius:7px;font-size:0.85rem;outline:none;}
+.free-ship{background:#065f4622;border:1px solid #10b98133;color:var(--success);border-radius:8px;padding:0.6rem;font-size:0.82rem;text-align:center;margin:0.8rem 0;}
+@media(max-width:800px){.cart-grid{grid-template-columns:1fr;}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top:2rem;">
+  <div class="breadcrumb" style="color:var(--muted);font-size:0.85rem;margin-bottom:1.5rem;">
+    <a href="/" style="color:var(--muted);">Home</a> › <span style="color:var(--text);">Shopping Cart</span>
+  </div>
+
+  {% if cart_items %}
+  <div class="cart-grid">
+    <!-- ITEMS -->
+    <div class="cart-items">
+      <div class="cart-header">🛒 Shopping Cart ({{ cart_items|length }} item(s))</div>
+      {% for item in cart_items %}
+      <div class="cart-row">
+        <img src="{{ item.images[0] if item.images else '' }}" class="cart-img" alt="{{ item.name }}">
+        <div class="cart-info">
+          <div class="cart-name">{{ item.name }}</div>
+          <div class="cart-cat">{{ item.category }}</div>
+          <div class="cart-price">{{ settings.currency }} {{ "{:,.0f}".format(item.price) }}</div>
+        </div>
+        <form method="post" action="/cart/update" style="display:flex;align-items:center;gap:0.8rem;">
+          <input type="hidden" name="product_id" value="{{ item.id }}">
+          <div class="cart-qty">
+            <button type="button" class="cq-btn" onclick="this.form.quantity.value=Math.max(1,+this.form.quantity.value-1);this.form.submit()">−</button>
+            <input type="number" name="quantity" class="cq-input" value="{{ item.qty }}" min="1">
+            <button type="button" class="cq-btn" onclick="this.form.quantity.value=+this.form.quantity.value+1;this.form.submit()">+</button>
+          </div>
+          <div class="cart-sub">{{ settings.currency }} {{ "{:,.0f}".format(item.subtotal) }}</div>
+        </form>
+        <form method="post" action="/cart/remove">
+          <input type="hidden" name="product_id" value="{{ item.id }}">
+          <button type="submit" class="remove-btn" title="Remove">🗑</button>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="cart-summary">
+      <h3>Order Summary</h3>
+      <div class="summary-row"><span class="label">Subtotal</span><span>{{ settings.currency }} {{ "{:,.0f}".format(total) }}</span></div>
+      <div class="summary-row"><span class="label">Shipping</span>
+        <span>{% if shipping == 0 %}<span style="color:var(--success);">FREE</span>{% else %}{{ settings.currency }} {{ shipping }}{% endif %}</span>
+      </div>
+      {% if shipping > 0 %}
+      <div class="free-ship">Add {{ settings.currency }} {{ "{:,.0f}".format(settings.free_shipping_above - total) }} more for FREE shipping!</div>
+      {% else %}
+      <div class="free-ship">🎉 You qualify for FREE shipping!</div>
+      {% endif %}
+      <div class="summary-row total">
+        <span>Total</span>
+        <span style="color:var(--accent);">{{ settings.currency }} {{ "{:,.0f}".format(grand_total) }}</span>
+      </div>
+      <a href="/checkout" class="btn btn-primary btn-block btn-lg" style="margin-top:1rem;">Proceed to Checkout →</a>
+      <a href="/" class="btn btn-ghost btn-block" style="margin-top:0.6rem;">← Continue Shopping</a>
+    </div>
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:6rem 2rem;">
+    <div style="font-size:5rem;">🛒</div>
+    <h2 style="font-family:'Playfair Display',serif;margin:1rem 0;">Your cart is empty</h2>
+    <p style="color:var(--muted);">Looks like you haven't added anything yet.</p>
+    <a href="/" class="btn btn-primary btn-lg" style="margin-top:1.5rem;">Start Shopping →</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

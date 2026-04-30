@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Order #{{ order.id }} — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--card:#1a1a26;--border:#2a2a3e;--accent:#f59e0b;--accent2:#38bdf8;--text:#e2e8f0;--muted:#64748b;--surface:#12121a;--success:#10b981;--danger:#ef4444;--purple:#a855f7;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;padding:2rem;}
+.wrap{max-width:800px;margin:0 auto;}
+.back{color:var(--muted);font-size:0.875rem;display:inline-flex;align-items:center;gap:0.3rem;margin-bottom:1.5rem;}
+.back:hover{color:var(--text);}
+h1{font-family:'Playfair Display',serif;font-size:2rem;margin-bottom:2rem;}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+.box{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.5rem;}
+.box h3{font-family:'Playfair Display',serif;font-size:1.1rem;margin-bottom:1rem;color:var(--accent);}
+.row{display:flex;justify-content:space-between;padding:0.5rem 0;border-bottom:1px solid var(--border)22;font-size:0.875rem;}
+.row:last-child{border-bottom:none;}
+.row .l{color:var(--muted);}
+.badge{display:inline-block;padding:0.3rem 0.8rem;border-radius:20px;font-size:0.8rem;font-weight:600;}
+.badge-pending{background:#92400e22;color:#f59e0b;border:1px solid #f59e0b44;}
+.badge-confirmed{background:#1e3a5f22;color:var(--accent2);border:1px solid #38bdf844;}
+.badge-shipped{background:#4c1d9522;color:var(--purple);border:1px solid #a855f744;}
+.badge-delivered{background:#065f4622;color:var(--success);border:1px solid #10b98144;}
+.badge-cancelled{background:#7f1d1d22;color:var(--danger);border:1px solid #ef444444;}
+.item-row{display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0;border-bottom:1px solid var(--border)22;font-size:0.875rem;}
+.item-row:last-child{border-bottom:none;}
+.status-form{display:flex;gap:0.6rem;align-items:center;margin-top:1rem;}
+select{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:0.5rem 0.8rem;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:0.875rem;outline:none;}
+.btn{display:inline-block;padding:0.5rem 1.2rem;border-radius:7px;font-size:0.85rem;font-weight:600;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;}
+.btn-p{background:var(--accent);color:#000;}
+.btn-s{background:var(--card);color:var(--text);border:1px solid var(--border);}
+.full{grid-column:1/-1;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="/admin/dashboard" class="back">← Back to Dashboard</a>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;">
+    <h1 style="margin-bottom:0;">Order #{{ order.id }}</h1>
+    <span class="badge badge-{{ order.status }}">{{ order.status|capitalize }}</span>
+  </div>
+
+  <div class="grid">
+    <!-- CUSTOMER INFO -->
+    <div class="box">
+      <h3>👤 Customer Details</h3>
+      <div class="row"><span class="l">Name</span><strong>{{ order.customer_name }}</strong></div>
+      <div class="row"><span class="l">Phone</span><a href="tel:{{ order.customer_phone }}" style="color:var(--accent2);">{{ order.customer_phone }}</a></div>
+      {% if order.customer_email %}<div class="row"><span class="l">Email</span>{{ order.customer_email }}</div>{% endif %}
+      <div class="row"><span class="l">Address</span><span style="text-align:right;max-width:200px;">{{ order.customer_address }}</span></div>
+      <div class="row"><span class="l">City</span>{{ order.customer_city }}</div>
+      {% if order.customer_notes %}<div class="row"><span class="l">Notes</span><span style="color:var(--muted);">{{ order.customer_notes }}</span></div>{% endif %}
+    </div>
+
+    <!-- ORDER INFO -->
+    <div class="box">
+      <h3>📋 Order Info</h3>
+      <div class="row"><span class="l">Order ID</span><strong style="color:var(--accent);">#{{ order.id }}</strong></div>
+      <div class="row"><span class="l">Date</span>{{ order.created_at }}</div>
+      <div class="row"><span class="l">Subtotal</span>{{ settings.currency }} {{ "{:,.0f}".format(order.total) }}</div>
+      <div class="row"><span class="l">Shipping</span>{% if order.shipping == 0 %}<span style="color:var(--success);">FREE</span>{% else %}{{ settings.currency }} {{ order.shipping }}{% endif %}</div>
+      <div class="row" style="font-weight:700;"><span class="l" style="color:var(--text);">Grand Total</span><span style="color:var(--accent);font-size:1.1rem;">{{ settings.currency }} {{ "{:,.0f}".format(order.grand_total) }}</span></div>
+    </div>
+
+    <!-- ITEMS -->
+    <div class="box full">
+      <h3>📦 Items Ordered</h3>
+      {% for item in order.items %}
+      <div class="item-row">
+        <div><strong>{{ item.product_name }}</strong><span style="color:var(--muted);margin-left:0.5rem;">× {{ item.quantity }}</span></div>
+        <div><span style="color:var(--muted);">{{ settings.currency }} {{ "{:,.0f}".format(item.price) }} each</span> → <strong style="color:var(--accent);">{{ settings.currency }} {{ "{:,.0f}".format(item.subtotal) }}</strong></div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- UPDATE STATUS -->
+    <div class="box full">
+      <h3>🔄 Update Order Status</h3>
+      <form method="post" action="/admin/orders/update/{{ order.id }}" class="status-form">
+        <select name="status">
+          <option value="pending" {% if order.status=='pending' %}selected{% endif %}>Pending</option>
+          <option value="confirmed" {% if order.status=='confirmed' %}selected{% endif %}>Confirmed</option>
+          <option value="shipped" {% if order.status=='shipped' %}selected{% endif %}>Shipped</option>
+          <option value="delivered" {% if order.status=='delivered' %}selected{% endif %}>Delivered</option>
+          <option value="cancelled" {% if order.status=='cancelled' %}selected{% endif %}>Cancelled</option>
+        </select>
+        <button type="submit" class="btn btn-p">Update Status</button>
+        <a href="/admin/dashboard" class="btn btn-s">← Back</a>
+      </form>
+    </div>
+  </div>
+</div>
+</body>
+</html>

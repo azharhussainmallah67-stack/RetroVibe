@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }} — {{ settings.store_name }}{% endblock %}
+{% block extra_css %}
+<style>
+.breadcrumb{color:var(--muted);font-size:0.85rem;margin-bottom:1.5rem;}
+.breadcrumb a{color:var(--muted); text-decoration: none;}
+.breadcrumb span{margin:0 0.4rem;}
+
+.pd-grid{display:grid;grid-template-columns:1fr 1fr;gap:3.5rem;align-items:start;}
+.gallery{position:sticky;top:88px;}
+.main-img{border-radius:14px;overflow:hidden;border:1px solid var(--border);aspect-ratio:4/3;background:var(--card);}
+.main-img img{width:100%;height:100%;object-fit:cover;}
+.thumb-row{display:flex;gap:0.6rem;margin-top:0.8rem;}
+.thumb{width:72px;height:54px;border-radius:8px;overflow:hidden;border:2px solid var(--border);cursor:pointer;}
+.thumb.active{border-color:var(--accent);}
+
+.pd-info{ display: block; min-height: 1px; } /* Fixed empty ruleset */
+.pd-title{font-family:'Playfair Display',serif;font-size:2.5rem;margin:0.5rem 0;}
+.pd-price{font-size:2.2rem;font-weight:700;color:var(--accent);}
+
+/* Fixed: rgba transparency */
+.pd-saving{background:rgba(6,95,70,0.1);color:var(--success);border:1px solid rgba(16,185,129,0.2);border-radius:6px;padding:0.2rem 0.6rem;font-size:0.8rem;}
+
+.qty-wrap{display:flex;align-items:center;border:1px solid var(--border);border-radius:8px;width: fit-content;}
+.qty-btn{background:var(--card);border:none;color:var(--text);width:40px;height:40px;cursor:pointer;}
+.qty-input{background:transparent;border:none;width:50px;text-align:center;color:var(--text);font-weight:600;}
+
+.action-row{display:flex;gap:1rem;margin-top:2rem;}
+.btn{padding: 1rem 2rem; border-radius: 8px; text-decoration: none; font-weight: 600; flex: 1; text-align: center;}
+.btn-primary{background: var(--accent); color: #000;}
+.btn-secondary{background: var(--card); border: 1px solid var(--border); color: var(--text);}
+
+@media(max-width:900px){.pd-grid{grid-template-columns:1fr;}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="breadcrumb">
+    <a href="/">Home</a><span>›</span>
+    <a href="/?category={{ product.category }}">{{ product.category }}</a><span>›</span>
+    <span style="color:var(--text);">{{ product.name }}</span>
+  </div>
+
+  <div class="pd-grid">
+    <div class="gallery">
+      <div class="main-img">
+        <img src="{{ product.images[0] if product.images else '' }}" alt="{{ product.name }}" id="mainImg">
+      </div>
+      <div class="thumb-row">
+        {% for img in product.images %}
+        <div class="thumb {% if loop.first %}active{% endif %}" onclick="switchImg('{{ img }}', this)">
+          <img src="{{ img }}" style="width:100%; height:100%; object-fit:cover;">
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="pd-info">
+      <div class="pd-cat" style="color:var(--accent2); font-weight:700; text-transform:uppercase; font-size:0.8rem;">{{ product.category }}</div>
+      <h1 class="pd-title">{{ product.name }}</h1>
+      
+      <div class="pd-price-row" style="margin: 1.5rem 0;">
+        <span class="pd-price">{{ settings.currency }} {{ "{:,.0f}".format(product.price) }}</span>
+      </div>
+
+      <p class="pd-desc" style="color:var(--muted); line-height:1.7; margin-bottom:2rem;">{{ product.description }}</p>
+
+      {% if product.stock > 0 %}
+      <form method="post" action="/cart/add">
+        <input type="hidden" name="product_id" value="{{ product.id }}">
+        <div class="qty-row" style="margin-bottom: 2rem;">
+          <div class="qty-wrap">
+            <button type="button" class="qty-btn" onclick="changeQty(-1)">−</button>
+            <input type="number" name="quantity" id="qtyInput" class="qty-input" value="1" readonly>
+            <button type="button" class="qty-btn" onclick="changeQty(1)">+</button>
+          </div>
+          <p style="margin-top:1rem; font-weight:700;">Subtotal: <span id="subtotalDisplay">{{ settings.currency }} {{ "{:,.0f}".format(product.price) }}</span></p>
+        </div>
+        <div class="action-row">
+          <button type="submit" class="btn btn-secondary">🛒 Add to Cart</button>
+          <a href="/checkout" class="btn btn-primary">⚡ Buy Now</a>
+        </div>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+/* FIXED: Quotes added to prevent JS Errors */
+const price = parseFloat("{{ product.price }}") || 0;
+const currency = "{{ settings.currency }}";
+const stockMax = parseInt("{{ product.stock }}") || 0;
+
+function switchImg(src, el){
+  document.getElementById('mainImg').src = src;
+  document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function changeQty(d){
+  const inp = document.getElementById('qtyInput');
+  let val = parseInt(inp.value || 1) + d;
+  if(val < 1) val = 1;
+  if(val > stockMax) val = stockMax;
+  inp.value = val;
+  
+  const total = (price * val).toLocaleString();
+  document.getElementById('subtotalDisplay').textContent = currency + ' ' + total;
+}
+</script>
+{% endblock %}

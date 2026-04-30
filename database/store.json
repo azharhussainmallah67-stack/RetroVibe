@@ -1,0 +1,146 @@
+{
+  "products": [
+    {
+      "id": "1",
+      "name": "Wireless Headphones",
+      "price": 2500.0,
+      "category": "Electronics",
+      "description": "High quality sound with noise cancellation",
+      "stock": 50,
+      "image": "https://placehold.co/400x300/0f172a/38bdf8?text=Headphones",
+      "original_price": 2500.0,
+      "images": [],
+      "tags": [],
+      "featured": false
+    },
+    {
+      "id": "2",
+      "name": "Leather Wallet",
+      "price": 800,
+      "category": "Accessories",
+      "description": "Genuine leather, slim design with card slots",
+      "stock": 98,
+      "image": "https://placehold.co/400x300/0f172a/38bdf8?text=Wallet"
+    },
+    {
+      "id": "3",
+      "name": "Running Shoes",
+      "price": 3500,
+      "category": "Footwear",
+      "description": "Lightweight and comfortable for daily running",
+      "stock": 27,
+      "image": "https://placehold.co/400x300/0f172a/38bdf8?text=Shoes"
+    },
+    {
+      "id": "b33309fb",
+      "name": "Wireless Headphones",
+      "price": 1000.0,
+      "original_price": 1000.0,
+      "category": "Electronics",
+      "description": "aasassassd",
+      "stock": 198,
+      "images": [
+        "https://placehold.co/800x600/1a1a26/64748b?text=No+Image"
+      ],
+      "tags": [],
+      "featured": false,
+      "created_at": "29 Apr 2026"
+    }
+  ],
+  "orders": [
+    {
+      "id": "99AED00E",
+      "items": [
+        {
+          "product_id": "2",
+          "product_name": "Leather Wallet",
+          "price": 800,
+          "quantity": 1,
+          "subtotal": 800
+        },
+        {
+          "product_id": "3",
+          "product_name": "Running Shoes",
+          "price": 3500,
+          "quantity": 1,
+          "subtotal": 3500
+        }
+      ],
+      "total": 4300,
+      "shipping": 0,
+      "grand_total": 4300,
+      "customer_name": "Azhar Hussain",
+      "customer_phone": "03141252648",
+      "customer_email": "azharhussainmallah67@gmail.com",
+      "customer_address": "House No B 113",
+      "customer_city": "Allan Faqeer Chowk",
+      "customer_notes": "",
+      "status": "pending",
+      "created_at": "29 Apr 2026, 04:02 PM"
+    },
+    {
+      "id": "B9FAC18B",
+      "items": [
+        {
+          "product_id": "2",
+          "product_name": "Leather Wallet",
+          "price": 800,
+          "quantity": 1,
+          "subtotal": 800
+        },
+        {
+          "product_id": "3",
+          "product_name": "Running Shoes",
+          "price": 3500,
+          "quantity": 1,
+          "subtotal": 3500
+        }
+      ],
+      "total": 4300,
+      "shipping": 0,
+      "grand_total": 4300,
+      "customer_name": "Azhar Hussain",
+      "customer_phone": "03141252648",
+      "customer_email": "azharhussainmallah67@gmail.com",
+      "customer_address": "House No B 113",
+      "customer_city": "Allan Faqeer Chowk",
+      "customer_notes": "",
+      "status": "pending",
+      "created_at": "29 Apr 2026, 04:02 PM"
+    },
+    {
+      "id": "C44E33B7",
+      "items": [
+        {
+          "product_id": "3",
+          "product_name": "Running Shoes",
+          "price": 3500,
+          "quantity": 1,
+          "subtotal": 3500
+        }
+      ],
+      "total": 3500,
+      "shipping": 0,
+      "grand_total": 3500,
+      "customer_name": "Azhar Hussain",
+      "customer_phone": "03141252648",
+      "customer_email": "azharhussainmallah67@gmail.com",
+      "customer_address": "House No B 113",
+      "customer_city": "Allan Faqeer Chowk",
+      "customer_notes": "",
+      "status": "pending",
+      "created_at": "29 Apr 2026, 04:15 PM"
+    }
+  ],
+  "settings": {
+    "store_name": "MyStore",
+    "currency": "PKR",
+    "admin_password": "admin123",
+    "store_tagline": "",
+    "whatsapp": "03123296340",
+    "email": "azharhussainmallah67@gmail.com",
+    "address": "",
+    "announcement": "",
+    "free_shipping_above": 3000
+  }
+}
